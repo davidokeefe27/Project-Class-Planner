@@ -1,0 +1,11 @@
+C:\Users\16146\PycharmProjects\Class_Planning>python courses_still_needed.py
+3 Credits in Courses: CPSC  6109
+3 Credits in Courses: CPSC  6119
+3 Credits in Courses: CYBR  6126
+3 Credits in Courses: CPSC  6185
+6 Credits in Courses: CPSC  6985, CPSC  6986, CPSC  6127, CPSC  6698
+3 Credits in Courses: CPSC  6000
+3 Credits in Courses: CPSC  6127
+3 Credits in Courses: CPSC  6157
+[{'Amount': 3, 'Courses': 'CPSC  6109'}, {'Amount': 3, 'Courses': 'CPSC  6119'}, {'Amount': 3, 'Courses': 'CYBR  6126'}, {'Amount': 3, 'Courses': 'CPSC  6185'}, {'Amount': 6, 'Courses': 'CPSC  6985, CPSC  6986, CPSC  6127, CPSC  6698'}, {'Amount': 3, 'Courses': 'CPSC  6000'}, {'Amount': 3, 'Courses': 'CPSC  6127'}, {'Amount': 3, 'Courses': 'CPSC  6157'}]
+['CPSC', 'CYBR']
