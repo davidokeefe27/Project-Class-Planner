@@ -6,6 +6,7 @@ Imports courses_still_needed, get_prerequisites, and get_schedule to create the 
 
 
 import pandas as pd
+from datetime import date
 from courses_still_needed import get_courses_still_needed  # Extracts courses still needed from DegreeWorks PDF
 from get_prerequisites import get_prerequisites  # Gets prerequisites for courses from catalog
 from get_schedule import get_schedule  # Reads schedule Excel files to find when courses are offered
@@ -38,10 +39,25 @@ def get_data(pdf_src, schedule_excel_file, study_plan_excel_file):
 
     return course_list, prerequisites, classes_offered, all_semesters
 
+def get_current_semester():
+    year = date.today().year
+    month = date.today().month
+    semester = ""
+    if month <= 5 :
+        semester = "SP" # Current is Spring
+    elif month <= 8:
+        semester = "SU" # Current is Summer
+    else:
+        semester = "FA" # Current is Fall
+    semester = semester + str(year)[-2:]
+    return semester
+
 
 def select_required_courses(course_list, classes_offered):
     # Selects which courses must be taken to satisfy requirements
     to_take = []
+    not_scheduled = []
+    course_list = sorted(course_list, key=lambda d: (d["Amount"], d["Courses"]))
     for item in course_list:
         class_credits = int(item["Amount"])   # number of credits needed
         courses = [c.strip() for c in item["Courses"].split(",")]
@@ -54,7 +70,9 @@ def select_required_courses(course_list, classes_offered):
                 to_take.append(course)
                 class_credits -= 3  # assume each course is 3 credits
             count += 1
-    return to_take
+        if class_credits > 0:
+            not_scheduled.append(str(class_credits) + " Credit(s) in "+item["Courses"])
+    return to_take, not_scheduled
 
 
 def semester_key(semester):
@@ -77,8 +95,10 @@ def create_schedule(
         to_take,
         max_credits
 ):
-    # Sort semester list
+    # Sort semester list and only schedule if after current semester
     all_semesters.sort(key=semester_key)
+    semester_index = all_semesters.index(get_current_semester())+1 # Next semester
+    all_semesters[:] = all_semesters[semester_index:]
 
     # Initialize schedule dict and fill with all semesters
     schedule = {semester: [] for semester in all_semesters}
@@ -123,11 +143,14 @@ def create_schedule(
     return schedule
 
 
-def output_schedule(schedule, path):
+def output_schedule(schedule, path, not_scheduled):
     # Write the schedule dictionary into an Excel file
     columns = {}
     for semester, courses in schedule.items():
-        columns[semester] = pd.Series(courses)  # one column per semester
+        if courses:
+            columns[semester] = pd.Series(courses)  # one column per semester
+    if not_scheduled:
+        columns["Not Able to Schedule: "] = pd.Series(not_scheduled)
     data_frame = pd.DataFrame(columns)
     data_frame.to_excel(path, index=False)
 
@@ -138,8 +161,8 @@ def make_schedule(pdf_src, schedule_excel_file, study_plan_excel_file, max_credi
         pdf_src, schedule_excel_file, study_plan_excel_file
     )
     # Choose courses
-    to_take = select_required_courses(course_list, classes_offered)
+    to_take, not_scheduled = select_required_courses(course_list, classes_offered)
     # Build plan
     schedule = create_schedule(all_semesters, classes_offered, prerequisites, to_take, max_credits)
     # Save output
-    output_schedule(schedule, path)
+    output_schedule(schedule, path, not_scheduled)
