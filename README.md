@@ -41,3 +41,26 @@ Course_Planner/
     - The results are saved in: `output/to_take.xlsx`
 
 *Note: If the output file does not appear, move the entire extracted folder to an accessible location like your Desktop and run the `.exe` again to resolve potential Windows permissions issues.*
+
+## 🧪 Running the Unit Tests
+
+This guide outlines the steps to execute the unit tests for the Course Planner project. The tests are written using the pytest framework and require the project's dependencies to be installed within a virtual environment.
+
+- You must have the following installed to run the tests:
+- Python 3.x
+- Virtual Environment (.venv or venv folder created)
+
+All required dependencies (pytest, pdfplumber, pandas, etc.) installed via pip install -r requirements.txt (or equivalent commands).
+
+To execute all tests found in the test_*.py files within your project structure (including scripts/):
+
+```
+python -m pytest
+```
+
+To Run a Specific Test File
+To execute tests only in a specific file (e.g., test_make_schedule.py):
+
+```
+python -m pytest .\scripts\test_make_schedule.py
+```
