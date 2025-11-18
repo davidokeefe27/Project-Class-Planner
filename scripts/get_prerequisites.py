@@ -14,65 +14,73 @@ def get_prerequisites(unique_subject_designator, all_courses):
     # Start with every course mapped to an empty list
     prerequisites_list = {course: [] for course in all_courses}
 
-    # Loop through each subject code given
+    course_pattern = r"[A-Z]{4}\s\d{4}[A-Za-z]?"
+
     for subject_designator in unique_subject_designator:
-        # Catalog URL with the requirements
+        subject = subject_designator.upper()
+        # Catalog URL format
         url = (
-            "https://catalog.columbusstate.edu/course-descriptions/"
-            + subject_designator.lower()
-            + "/"
+                "https://catalog.columbusstate.edu/course-descriptions/"
+                + subject.lower()
+                + "/"
         )
-        response = requests.get(url)
+
+        try:
+            response = requests.get(url, timeout=10)  # Set a timeout for safety
+        except requests.exceptions.RequestException as e:
+            print(f"      -> ERROR: Could not access catalog for {subject} at {url}. Error: {e}")
+            continue
 
         # Verifies website request was successful
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
 
-            # Each course entry is inside a <div class="courseblock">
+            # Each course entry is typically inside a <div class="courseblock">
             course_blocks = soup.find_all("div", class_="courseblock")
 
             # Process each course entry
             for course_block in course_blocks:
-                course_number_text = course_block.get_text()
+                course_block_text = course_block.get_text().replace("\xa0", " ").strip()
 
-                # Find the course number
-                course_number_match = re.search(
-                    rf"{subject_designator.upper()}\s*(\b\w+\b)",
-                    course_number_text,
+                # 1. Find the current course code (e.g., CPSC 6125)
+                # This regex looks for the subject followed by 4 digits (or more letters/numbers)
+                course_full_match = re.search(
+                    rf"({subject}\s*\d{{4}}[A-Za-z]?)\b",
+                    course_block_text,
                 )
 
-                # Regex to identify full course codes
-                course_pattern = r"[A-Z]{4}\s\d{4}[A-Za-z]?"
-                # Regex for prerequisites with and/or
-                prerequisites_pattern = (
-                    rf"{course_pattern}|\b(?:and|or)\b(?=\s{course_pattern})"
-                )
+                if not course_full_match:
+                    continue  # Skip blocks that don't match the expected course format
 
-                # Getting the 4 digit course number
-                course_number = (
-                    course_number_match.group(1).strip()
-                    if course_number_match
-                    else "None"
-                )
-                course = subject_designator + " " + course_number
+                course = course_full_match.group(1).replace(" ", "")  # Clean up spaces
 
-                # Get the raw text for prerequisites
-                prerequisites_text = course_block.get_text().replace("\xa0", " ").strip()
+                # Format to standard "CPSC 6125" for matching with all_courses
+                course_code = course[:4] + " " + course[4:]
+
+                # 2. Check if this is a course we need prerequisites for
+                if course_code not in all_courses:
+                    continue
+
+                    # 3. Get the raw text for prerequisites
                 prerequisites_match = re.search(
-                    r"Prerequisite\(s\):\s*(.*)", prerequisites_text
+                    r"Prerequisite\(s\):\s*(.*?)(\.\s*Credit Hours|$)",
+                    course_block_text,
+                    re.IGNORECASE | re.DOTALL  # Ignore case and allow . to match newline
                 )
 
-                # If this course has prerequisites, and it's in our list
-                if prerequisites_match and course in all_courses:
-                    prerequisites = prerequisites_match.group(1).strip()
+                if prerequisites_match:
+                    prerequisites_raw = prerequisites_match.group(1).strip()
 
-                    # Extract all prerequisite course codes
-                    prerequisites = " ".join(
-                        re.findall(prerequisites_pattern, prerequisites)
-                    )
+                    # 4. Extract only the course codes from the raw prerequisite text
+                    # We look for all instances of the standard course pattern
+                    prereq_courses = re.findall(course_pattern, prerequisites_raw)
 
-                    # Save prerequisites for this course
-                    prerequisites_list[course].append(prerequisites)
+                    # 5. Save the clean list of prerequisite course codes
+                    prerequisites_list[course_code] = prereq_courses
 
-    # Return dictionary: course -> list of prerequisites
+        else:
+            print(
+                f"      -> WARNING: Failed to retrieve catalog page for {subject}. Status code: {response.status_code}")
+
+    # Return dictionary: course -> list of prerequisite courses
     return prerequisites_list
