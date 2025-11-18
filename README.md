@@ -1,66 +1,163 @@
-# Smart Class Planner
+Smart Class Planner
 
-This tool creates a semester-by-semester class plan from a DegreeWorks PDF, a Graduate Plan Excel, and a 4-Year Schedule Excel.
+===================
 
-## 🛠️ Setup
-```bash
+This tool generates a semester-by-semester course plan using input files from DegreeWorks, the Graduate Study Plan, and the 4-Year Schedule. It checks prerequisites, determines course ordering, and outputs a recommended plan to Excel.
+
+Requirements
+
+------------
+
+- Windows 10/11
+
+- Python 3.12+
+
+- Git (optional)
+
+- For building a standalone `.exe`: PyInstaller
+
+Setup
+
+-----
+
+1. Create and activate a virtual environment:
+
+```
+
+python -m venv .venv
+
+.\.venv\Scripts\Activate.ps1 (PowerShell)
+
+.\.venv\Scripts\activate.bat (cmd.exe)
+
+```
+
+2. Install dependencies:
+
+```
+
 pip install -r requirements.txt
+
 ```
 
-## 🧑‍💻 Usage
-1. Place these files in the project input folder:
-   - degree_works.pdf
-   - 4-year schedule.xlsx
-   - Graduate Study Plans -revised.xlsx
+Input & Output
 
-2. Run:
-```bash
+--------------
+
+Place these files inside the `input/` directory:
+
+- degree_works.pdf
+
+- 4-year schedule.xlsx
+
+- Graduate Study Plans -revised.xlsx
+
+Output file generated:
+
+- output/to_take.xlsx
+
+Running the Program
+
+-------------------
+
+```
+
 python scripts/main.py
-```
-
-## 🚀 Execution Guide: Running the Course Planner (Windows)
-The output plan will be written to an Excel file inside the output folder.This tool is provided as a standalone Windows executable (.exe) and does not require Python or external installations. Please dowload the files in the [here](https://github.com/davidokeefe27/Project-Class-Planner/releases/tag/v1.0.0).
-
-### Requirements
-Ensure your input files are placed in the required structure (Replace input files with your own):
 
 ```
-Course_Planner/
-├── Course_Planner.exe
-└── input/
-    ├── degree_works.pdf          # DegreeWorks List
-    ├── 4-year schedule.xlsx      # 4-Year Schedule
-    └── Graduate Study Plans -revised.xlsx # Graduate Study Plan
-```
 
-### Intructions 
-1. Extract the Files: Right-click the main `.zip` file and select "Extract All..." You cannot run the program reliably while it is still compressed.
-2. Organize Inputs: Place all three required input files inside the `input/` folder of the extracted directory.
-3. Run: Double-click the `Course_Planner.exe`.
-4. Find Output: The program will automatically create a new folder named `output/` in the same location.
-    - The results are saved in: `output/to_take.xlsx`
+Running Tests
 
-*Note: If the output file does not appear, move the entire extracted folder to an accessible location like your Desktop and run the `.exe` again to resolve potential Windows permissions issues.*
-
-## 🧪 Running the Unit Tests
-
-This guide outlines the steps to execute the unit tests for the Course Planner project. The tests are written using the pytest framework and require the project's dependencies to be installed within a virtual environment.
-
-- You must have the following installed to run the tests:
-- Python 3.x
-- Virtual Environment (.venv or venv folder created)
-
-All required dependencies (pytest, pdfplumber, pandas, etc.) installed via pip install -r requirements.txt (or equivalent commands).
-
-To execute all tests found in the test_*.py files within your project structure (including scripts/):
+-------------
 
 ```
+
 python -m pytest
-```
 
-To Run a Specific Test File
-To execute tests only in a specific file (e.g., test_make_schedule.py):
+python -m pytest scripts/test_make_schedule.py
 
 ```
-python -m pytest .\scripts\test_make_schedule.py
+
+Creating a Standalone Windows `.exe`
+
+------------------------------------
+
+1. Activate the virtual environment:
+
 ```
+
+python -m venv .venv
+
+.\.venv\Scripts\Activate.ps1
+
+```
+
+
+2. Install PyInstaller:
+
+```
+
+pip install pyinstaller
+
+```
+
+3. Build the executable:
+
+```
+
+pyinstaller --onefile --name SmartClassPlanner scripts/main.py
+
+```
+
+4. After build, you'll have:
+
+```
+
+dist/
+
+SmartClassPlanner.exe
+
+```
+
+5. Copy `input/` into `dist/`:
+
+```
+
+dist/
+
+SmartClassPlanner.exe
+
+input/
+
+degree_works.pdf
+
+4-year schedule.xlsx
+
+Graduate Study Plans -revised.xlsx
+
+```
+
+6. Run the executable:
+
+```
+
+cd dist
+
+./SmartClassPlanner.exe
+
+```
+
+
+Demo 3 Checklist
+
+----------------
+
+- Installation instructions included
+
+- How to run from source
+
+- How to run tests
+
+- Full `.exe` build process documented
+
+- Input/output structure explained
