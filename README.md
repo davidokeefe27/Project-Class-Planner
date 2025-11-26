@@ -1,163 +1,161 @@
-Smart Class Planner
+Smart Class Planner - README
 
-===================
+Purpose
+Smart Class Planner is a command-line tool that generates a semester-by-semester course plan from a student’s DegreeWorks report and CSU planning spreadsheets. It:
 
-This tool generates a semester-by-semester course plan using input files from DegreeWorks, the Graduate Study Plan, and the 4-Year Schedule. It checks prerequisites, determines course ordering, and outputs a recommended plan to Excel.
+- Reads required and completed courses from a DegreeWorks PDF.
+- Uses the official 4-year schedule and Graduate Study Plan spreadsheets to find when courses are offered.
+- Checks prerequisites and orders courses so they are taken in a valid sequence.
+- Produces an Excel file showing which courses to take each term, focusing on required (core) courses only.
 
-Requirements
+The goal is to help students and advisors ensure that prerequisites are not missed and that the student can graduate on time with a clear, editable plan in Excel.
 
-------------
+Prerequisites
+- Operating System: Windows 10 or Windows 11
+- Python: Python 3.12+ (64-bit recommended)
+- Tools (optional but recommended):
+  - Git (to clone the repository)
+  - A virtual environment tool (venv built into Python)
+- Python packages: All Python dependencies are listed in requirements.txt. You do not need to install them one-by-one; use the single command shown below in the Build / Installation section.
 
-- Windows 10/11
+Note: If you only want to use the Windows executable (SmartClassPlanner.exe), you can skip Python and requirements.txt entirely.
 
-- Python 3.12+
+Download
+You can obtain the project in either of these ways:
 
-- Git (optional)
+1. Clone the repository (recommended)
+   From a terminal (PowerShell or Command Prompt):
 
-- For building a standalone `.exe`: PyInstaller
+   git clone <repository-url>
+   cd Project-Class-Planner
 
-Setup
+   Replace <repository-url> with your GitHub or GitHub Classroom URL.
 
------
+2. Download ZIP and extract
+   - Download the project ZIP file from your course site or GitHub.
+   - Right-click the ZIP and choose Extract All…
+   - Navigate into the extracted Project-Class-Planner folder.
 
-1. Create and activate a virtual environment:
+The project root directory should contain folders like scripts, input, output, and dist.
 
-```
+Build / Configuration / Installation / Deployment
 
-python -m venv .venv
+Option 1: Run from source (developer / grader setup)
+1. Open a terminal in the project root, for example:
 
-.\.venv\Scripts\Activate.ps1 (PowerShell)
+   cd path\to\Project-Class-Planner
 
-.\.venv\Scripts\activate.bat (cmd.exe)
+2. (Optional) Create and activate a virtual environment:
 
-```
+   python -m venv .venv
+   .venv\Scripts\activate
 
-2. Install dependencies:
+3. Install all Python dependencies using requirements.txt:
 
-```
+   pip install -r requirements.txt
 
-pip install -r requirements.txt
+   This will install everything the project needs (for example, pandas, pdfplumber, etc.) in one step.
 
-```
+4. Prepare input files:
+   Place the required input files in the input folder with the following exact names:
 
-Input & Output
+   - input/degree_works.pdf
+   - input/4-year schedule.xlsx
+   - input/Graduate Study Plans -revised.xlsx
 
---------------
+   The program expects these specific filenames and relative paths.
 
-Place these files inside the `input/` directory:
+5. (Optional) Run tests.
+   From the project root or scripts folder:
 
-- degree_works.pdf
+   pytest
 
-- 4-year schedule.xlsx
+Option 1b: Build the Windows executable yourself (PyInstaller)
+If SmartClassPlanner.exe is not provided, you can build it from the source code using PyInstaller.
 
-- Graduate Study Plans -revised.xlsx
-
-Output file generated:
-
-- output/to_take.xlsx
-
-Running the Program
-
--------------------
-
-```
-
-python scripts/main.py
-
-```
-
-Running Tests
-
--------------
-
-```
-
-python -m pytest
-
-python -m pytest scripts/test_make_schedule.py
-
-```
-
-Creating a Standalone Windows `.exe`
-
-------------------------------------
-
-1. Activate the virtual environment:
-
-```
-
-python -m venv .venv
-
-.\.venv\Scripts\Activate.ps1
-
-```
-
+1. Make sure you have installed dependencies as described above (pip install -r requirements.txt) and that you are in the project root (Project-Class-Planner).
 
 2. Install PyInstaller:
 
-```
-
-pip install pyinstaller
-
-```
+   pip install pyinstaller
 
 3. Build the executable:
 
-```
+   pyinstaller --onefile --name SmartClassPlanner scripts/main.py
 
-pyinstaller --onefile --name SmartClassPlanner scripts/main.py
+4. After the build completes, you will have a dist folder containing:
 
-```
+   dist/
+     SmartClassPlanner.exe
 
-4. After build, you'll have:
+5. Copy the input folder into dist so the executable can find the required files:
 
-```
+   dist/
+     SmartClassPlanner.exe
+     input/
+       degree_works.pdf
+       4-year schedule.xlsx
+       Graduate Study Plans -revised.xlsx
 
-dist/
+6. Run the executable from inside dist:
 
-SmartClassPlanner.exe
+   cd dist
+   .\SmartClassPlanner.exe
 
-```
+Option 2: Use an existing packaged Windows executable (SmartClassPlanner.exe)
+If SmartClassPlanner.exe is already provided (for example, in the dist folder), you can use it directly without rebuilding.
 
-5. Copy `input/` into `dist/`:
+1. Ensure the following structure (simplest approach is to keep everything together):
 
-```
+   Project-Class-Planner/
+     dist/
+       SmartClassPlanner.exe
+     input/
+       degree_works.pdf
+       4-year schedule.xlsx
+       Graduate Study Plans -revised.xlsx
+     output/
+       (generated files will appear here)
 
-dist/
+2. Open PowerShell or Command Prompt and navigate to the dist folder:
 
-SmartClassPlanner.exe
+   cd path\to\Project-Class-Planner\dist
 
-input/
+3. Run the executable:
 
-degree_works.pdf
+   .\SmartClassPlanner.exe
 
-4-year schedule.xlsx
+   The executable will look for the input folder and write its output to the output folder at the project level.
 
-Graduate Study Plans -revised.xlsx
+Usage
+-----
 
-```
+Running from source
+From the project root (after installing prerequisites and placing input files):
 
-6. Run the executable:
+   cd scripts
+   python main.py
 
-```
+What happens when you run the program:
+1. The tool reads:
+   - input/degree_works.pdf (DegreeWorks audit)
+   - input/4-year schedule.xlsx (CSU 4-year schedule)
+   - input/Graduate Study Plans -revised.xlsx (Graduate Study Plan)
+2. It determines:
+   - Which courses are still needed.
+   - When those courses are offered.
+   - A valid order that respects prerequisites, with a default maximum of 9 credits per term.
+3. It writes the recommended plan to:
 
-cd dist
+   - output/to_take.xlsx
 
-./SmartClassPlanner.exe
+Running the Windows executable
+From the dist folder:
 
-```
+   .\SmartClassPlanner.exe
 
+The behavior is the same as running from source:
+- Input: files from the input folder.
+- Output: output/to_take.xlsx containing the semester-by-semester course plan.
 
-Demo 3 Checklist
-
-----------------
-
-- Installation instructions included
-
-- How to run from source
-
-- How to run tests
-
-- Full `.exe` build process documented
-
-- Input/output structure explained
+Note: If you want to adjust the maximum credits per term or other behavior, edit scripts/main.py (for example, change max_credits = 9) and re-run from source or rebuild the executable with PyInstaller.
